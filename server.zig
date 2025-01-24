@@ -1,7 +1,8 @@
 const std = @import("std");
-
+const HOST_ADDR = "127.0.0.1";
+const PORT = 8080;
 pub fn main() !void {
-    const address = try std.net.Address.parseIp4("127.0.0.1", 8081);
+    const address = try std.net.Address.parseIp4(HOST_ADDR, PORT);
 
     var server = try address.listen(std.net.Address.ListenOptions{});
     defer server.deinit();
@@ -20,21 +21,8 @@ fn handleConnection(conn: std.net.Server.Connection) !void {
     const body_len = req.head.content_length orelse 0;
     std.debug.print("Received user data: {s}\n", .{buffer[req.head_end .. req.head_end + body_len]});
 
-    const response_body = "a" ** 1026;
+    const response_body = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" ** 100;
 
-    const chunk_size: u64 = 200;
-    var start_index: u64 = 0;
-    while (start_index < response_body.len) {
-        const end_index: u64 = @min(start_index + chunk_size, response_body.len);
-        const chunk = response_body[start_index..end_index];
-        try req.respond(chunk, std.http.Server.Request.RespondOptions{
-            .transfer_encoding = .chunked,
-        });
-        start_index = end_index;
-    }
-
-    // Send the final chunk (with length 0 to signal the end)
-    try req.respond(&[_]u8{}, std.http.Server.Request.RespondOptions{
-        .transfer_encoding = .chunked,
-    });
+    try req.respond(response_body, std.http.Server.Request.RespondOptions{ .transfer_encoding = .chunked });
+    std.debug.print("EXITED SERVER THREAD", .{});
 }
