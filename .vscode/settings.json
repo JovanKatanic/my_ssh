@@ -3,5 +3,6 @@
         "**/*.o": true,
         "**/server": true,
         "**/client": true,
+        "**/execute": true,
     },
 }
