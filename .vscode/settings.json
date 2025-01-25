@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "**/*.o": true,
+        "**/server": true,
+        "**/client": true,
+    },
+}
