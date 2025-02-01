@@ -1,4 +1,6 @@
 const std = @import("std");
+const pac = @import("packet.zig");
+
 const HOST_ADDR = "127.0.0.1";
 const PORT = 8081;
 const BUFFER_SIZE = 4096;
@@ -21,20 +23,22 @@ fn handleConnection(conn: std.net.Stream) !void {
     defer conn.close();
     var recv_buf: [BUFFER_SIZE]u8 = undefined;
 
-    const response_body = "a" ** 200;
-
     while (true) {
         const bytes_read = try conn.reader().read(&recv_buf);
+        
         if (bytes_read == 0) {
             std.debug.print("Break loop\n", .{});
             break;
         }
+        //TODO decrypt packet
+        const packet: pac.Packet = pac.readPacket(&recv_buf);
+        packet.print();
+
         //TODO execute command
-        std.debug.print("Server: {s}\n", .{recv_buf[0..bytes_read]});
-        if (std.mem.eql(u8, recv_buf[0..bytes_read], "CONNECT")) { //TODO should not be bytes read
+        if (std.mem.eql(u8, packet.payload, "CONNECT")) { //TODO should not be bytes read
             try conn.writer().writeAll(protocol_version ++ " " ++ protocol_version_comments ++ "\r\n");
         } else {
-            try conn.writer().writeAll(response_body);
+            try conn.writer().writeAll(packet.payload);
         }
     }
 
