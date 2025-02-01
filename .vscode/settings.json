@@ -5,4 +5,7 @@
         "**/client": true,
         "**/execute": true,
     },
+    "[zig]": {
+        "editor.formatOnSave": false
+    }
 }
